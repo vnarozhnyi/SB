@@ -39,11 +39,9 @@ namespace SeaBattle.Client.Hubs
             Clients.Others.shoot(x, y);
         }
 
-        public void GetRepair(int x, int y)
+        public static void GetRepair(int x, int y)
         {
-
             GameObjects.Repair[x, y] = 0;
-            Clients.Others.repair(x, y);
         }
 
         public void GetMove(Directions direction)
@@ -53,7 +51,7 @@ namespace SeaBattle.Client.Hubs
             Clients.Caller.move(JsonConvert.SerializeObject(direction));
         }
 
-        public void InitMap(Field field)
+        public void InitMap()
         {
             Clients.Others.message("Map initialization...");
         }

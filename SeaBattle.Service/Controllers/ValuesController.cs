@@ -1,39 +1,50 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
+﻿using BattleShip;
+using Newtonsoft.Json;
+using SeaBattle.Service.Hubs;
 using System.Web.Http;
 
 namespace SeaBattle.Service.Controllers
 {
     public class ValuesController : ApiController
     {
-        // GET api/values
-        public IEnumerable<string> Get()
+        [Route("api/InitializeMap")]
+        [HttpGet]
+        public string InitMap(string data)
         {
-            return new string[] { "value1", "value2" };
+            var _data = GameHub.GetInitMap();
+            return GameHub.GetAttributeEnc(_data.ToString());
         }
 
-        // GET api/values/5
-        public string Get(int id)
+        [Route("api/AddShip")]
+        [HttpPost]
+        public string AddShip(int x, int y, BaseShip ship)
         {
-            return "value";
+            var _data = GameHub.GetAddShip(x, y, ship);
+            return GameHub.GetAttributeEnc(_data.ToString());
         }
 
-        // POST api/values
-        public void Post([FromBody]string value)
+        [Route("api/GetMove")]
+        [HttpGet]
+        public string GetMove(Direction direction, BaseShip ship)
         {
+            object _data = GameHub.GetMove(direction, ship);
+            return GameHub.GetAttributeEnc(JsonConvert.SerializeObject(_data));
         }
 
-        // PUT api/values/5
-        public void Put(int id, [FromBody]string value)
+        [Route("api/GetShoot")]
+        [HttpGet]
+        public string GetShoot(int x, int y)
         {
+            object _data = GameHub.GetShoot(x, y);
+            return GameHub.GetAttributeEnc(_data.ToString());
         }
 
-        // DELETE api/values/5
-        public void Delete(int id)
+        [Route("api/GetRepair")]
+        [HttpGet]
+        public string GetRepair(int x, int y)
         {
+            object _data = GameHub.GetRepair(x, y);
+            return GameHub.GetAttributeEnc(_data.ToString());
         }
     }
 }
