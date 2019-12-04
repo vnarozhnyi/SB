@@ -1,0 +1,7 @@
+<ng-container *ngIf="!this.stateService.isAuth; else loggedIn">
+  <app-auth></app-auth>
+</ng-container>
+
+<ng-template #loggedIn>
+  <app-game-wrapper></app-game-wrapper>
+</ng-template>

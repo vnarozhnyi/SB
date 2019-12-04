@@ -1,0 +1,12 @@
+
+<div class="wrapper fadeInDown">
+  <div id="formContent">
+    <form class="auth-form my-2 my-lg-0">
+      <h1 class='main-heading'>Sea Battle</h1>
+      <input [(ngModel)]="nickName" [ngModelOptions]="{standalone: true}" class="form-control name-field" type="text"
+        placeholder="Nickname">
+      <button [disabled]="nickName.length ? false : true" (click)="onAuthClick()" type="button"
+        class="btn btn-primary">Enter the game</button>
+    </form>
+  </div>
+</div>
