@@ -1,66 +1,148 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Web;
-using CreateAttribute;
+﻿using CreateAttribute;
 using Microsoft.AspNet.SignalR;
 using Newtonsoft.Json;
-using ORM.Model;
+using ORM.Models;
+using SeaBattle.Client.Models;
 using SeaBattle.Client.Objects;
+using SeaBattle.Client.Services;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Threading.Tasks;
+
 
 namespace SeaBattle.Client.Hubs
 {
-    [GuidAttribute(guid)]
-    [Encryption(className: "CreateAttribute.EncryptionService", parametrs: new object[] { guid })]
+    //[Encryption(className: "CreateAttribute.EncryptionService", guid)]
     public class GameHub : Hub
     {
-        private const string guid = "F4E0560B-1F57-4E14-91ED-B998A0976F31";
-        public string GetAttributeEnc()
+        //private const string guid = "C4CD33D6-8AC4-4034-b273-0E236D93";
+        Field field = new Field();
+        HttpClient client = new HttpClient();
+        private SeaBattleService seaBattleService;
+        public GameHub()
         {
-            var filedInfo = typeof(GameHub).GetField(guid);
-            var encryptionAttribute = filedInfo.GetCustomAttribute(typeof(EncryptionAttribute)) as EncryptionAttribute;
+            this.seaBattleService = new SeaBattleService();
+        }
+        public static void UserLeftGame(User user)
+        {
+            if (user != null)
+            {
+                user.IsOnline = false;
+            }
 
-            return encryptionAttribute.Encryption<string>();
+            bool anyUserOnline = GameInfo.Users.Any(x => x.IsOnline);
+            if (!anyUserOnline)
+            {
+                GameInfo.GameState = GameState.FieldNotInitialized;
+            }
         }
 
-        public string GetAttributeDec(string data)
+        private User GetCurrentUser()
         {
-            var filedInfo = typeof(GameHub).GetField(data);
-            var encryptionAttribute = filedInfo.GetCustomAttribute(typeof(EncryptionAttribute)) as EncryptionAttribute;
+            var connectionId = Context.ConnectionId;
+            var currentUser = GameInfo.Users.FirstOrDefault(x => x.ConnectionId == connectionId);
 
-            return encryptionAttribute.Decryption<string>();
+            return currentUser;
         }
 
-        public void GetShoot(int x, int y)
+        public override Task OnDisconnected(bool stopCalled)
         {
-            GameObjects.Shoot[x, y] = 0;
-            Clients.Others.shoot(x, y);
+            if (stopCalled)
+            {
+                User currentUser = GetCurrentUser();
+                UserLeftGame(currentUser);
+            }
+
+            return null;
         }
 
-        public static void GetRepair(int x, int y)
+        public async Task Connect(string username)
         {
-            GameObjects.Repair[x, y] = 0;
+            var currentUser = GameInfo.Users.FirstOrDefault(x => x.Username == username);
+            if (currentUser == null)
+            {
+                currentUser = new User(username);
+                GameInfo.Users.Add(currentUser);
+            }
+
+            currentUser.IsOnline = true;
+            currentUser.ConnectionId = Context.ConnectionId;
+
+            await Clients.Others.SendMessage($"User {currentUser.Username} has just logged in.");
+            await Clients.Caller.SendMessage($"You successfully logged in as {currentUser.Username}");
         }
 
-        public void GetMove(Directions direction)
+        public async Task ShootContent(string message)
         {
-
-            Clients.Caller.message("Move");
-            Clients.Caller.move(JsonConvert.SerializeObject(direction));
+            await Clients.Others.SendMessage(message);
         }
 
-        public void InitMap()
+        public async Task RepairContent(string message)
         {
-            Clients.Others.message("Map initialization...");
+            await Clients.Others.SendMessage(message);
         }
 
-        public void AddShip(Ship ship)
+        public async Task AddShipContent(string message)
         {
-            GameObjects.FieldMap.ShipsList.Add(ship);
-            Clients.Caller.message("Ship added");
-            Clients.Caller.addShip(JsonConvert.SerializeObject(ship));
+            await Clients.Caller.SendMessage(message);
+        }
+
+        public async Task SendMessage(string message)
+        {
+            await this.Clients.All.SendMessage(message);
+        }
+
+        public async Task GetShoot(Shoot shoot)
+        {
+            var serialized = JsonConvert.SerializeObject(shoot, new EncryptionJsonConverter());
+            await this.seaBattleService.GetShoot(serialized);
+            await this.Clients.All.GetShoot(serialized);
+        }
+
+        public async Task GetRepair(Repair repair)
+        {
+            var serialized = JsonConvert.SerializeObject(repair, new EncryptionJsonConverter());
+            // await this.seaBattleService.GetRepair(serialized);
+            await this.Clients.All.GetRepair(serialized);
+        }
+
+        public async Task InitMap()
+        {
+            this.client.BaseAddress = new Uri("https://localhost:44386/");
+            GameObjects.FieldMap.X = field.X = 100;
+            GameObjects.FieldMap.Y = field.Y = 100;
+             var serialized = JsonConvert.SerializeObject(field, new EncryptionJsonConverter());
+             await this.seaBattleService.InitMap(serialized);
+            await this.Clients.All.InitializeField(GameObjects.FieldMap);
+        }
+
+        public async Task AddShip(Ship ship)
+        {
+            if (GameInfo.Ships == null)
+            {
+                GameInfo.Ships = new List<Ship>();
+            }
+            GameInfo.Ships.Add(ship);
+            var serialized = JsonConvert.SerializeObject(ship, new EncryptionJsonConverter());
+            await this.Clients.Caller.AddShip(JsonConvert.SerializeObject(ship));
+            await this.seaBattleService.AddShip(serialized);
+        }
+
+        public async Task Ready()
+        {
+            var currentUser = GameInfo.Users.FirstOrDefault(x => x.ConnectionId == this.Context.ConnectionId);
+            if (currentUser != null)
+            {
+                currentUser.IsReady = true;
+
+                var onlineUsers = GameInfo.Users.Where(x => x.IsOnline);
+                if (onlineUsers.All(x => x.IsReady))
+                {
+                    await this.Clients.All.StartGame();
+                }
+            }
         }
     }
 }

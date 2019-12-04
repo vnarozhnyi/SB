@@ -7,6 +7,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SeaBattle.Service", "SeaBat
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SeaBattle.Client", "SeaBattle.Client\SeaBattle.Client.csproj", "{EA4250DB-8903-4C99-B428-6B5348CD5D95}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ORM", "ORM\ORM.csproj", "{C1F3D7E6-41C4-4A34-9B13-3BF9032F6B42}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AttributeDLL", "..\AttributeDLL\AttributeDLL.csproj", "{ADDC3622-D625-4B82-BF3A-D6B32099C2A9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +25,14 @@ Global
 		{EA4250DB-8903-4C99-B428-6B5348CD5D95}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EA4250DB-8903-4C99-B428-6B5348CD5D95}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EA4250DB-8903-4C99-B428-6B5348CD5D95}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C1F3D7E6-41C4-4A34-9B13-3BF9032F6B42}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C1F3D7E6-41C4-4A34-9B13-3BF9032F6B42}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C1F3D7E6-41C4-4A34-9B13-3BF9032F6B42}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C1F3D7E6-41C4-4A34-9B13-3BF9032F6B42}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ADDC3622-D625-4B82-BF3A-D6B32099C2A9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ADDC3622-D625-4B82-BF3A-D6B32099C2A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ADDC3622-D625-4B82-BF3A-D6B32099C2A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ADDC3622-D625-4B82-BF3A-D6B32099C2A9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
